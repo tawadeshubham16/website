@@ -2,8 +2,8 @@
 
 import Script from "next/script";
 import { FormEvent, useState } from "react";
-
-const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+;
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || null;
 
 const includeItems = [
   {

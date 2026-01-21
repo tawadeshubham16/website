@@ -8,19 +8,15 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  SWARM_SERVICE: stack_neeshenterprise_frontend
-  NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-  NEXT_PUBLIC_CONTACT_TO_EMAIL: ${{ secrets.NEXT_PUBLIC_CONTACT_TO_EMAIL }}
-  NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
-  NEXT_PUBLIC_CAL_LINK: ${{ secrets.NEXT_PUBLIC_CAL_LINK }}
-  TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
-  RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-  CONTACT_FROM_EMAIL: ${{ secrets.CONTACT_FROM_EMAIL }}
-  CONTACT_TO_EMAIL: ${{ secrets.CONTACT_TO_EMAIL }}
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_CONTACT_TO_EMAIL: ${{ secrets.NEXT_PUBLIC_CONTACT_TO_EMAIL }}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      NEXT_PUBLIC_CAL_LINK: ${{ secrets.NEXT_PUBLIC_CAL_LINK }}
     environment: prod
     permissions:
       contents: read
@@ -71,6 +67,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: prod
+    env:
+      SWARM_SERVICE: stack_neeshenterprise_frontend
     permissions:
       contents: read
     steps:
@@ -93,27 +91,11 @@ jobs:
           SERVICE: ${{ env.SWARM_SERVICE }}
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.DEPLOY_GHCR_TOKEN }}
-          NEXT_PUBLIC_SITE_URL: ${{ env.NEXT_PUBLIC_SITE_URL }}
-          NEXT_PUBLIC_CONTACT_TO_EMAIL: ${{ env.NEXT_PUBLIC_CONTACT_TO_EMAIL }}
-          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ env.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
-          NEXT_PUBLIC_CAL_LINK: ${{ env.NEXT_PUBLIC_CAL_LINK }}
-          TURNSTILE_SECRET_KEY: ${{ env.TURNSTILE_SECRET_KEY }}
-          RESEND_API_KEY: ${{ env.RESEND_API_KEY }}
-          CONTACT_FROM_EMAIL: ${{ env.CONTACT_FROM_EMAIL }}
-          CONTACT_TO_EMAIL: ${{ env.CONTACT_TO_EMAIL }}
         run: |
           ssh -p ${PORT} ${USER}@${HOST} <<EOF
             set -e
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
             docker pull "${IMAGE}"
             docker service update --force --with-registry-auth \
-              --env-add NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL}" \
-              --env-add NEXT_PUBLIC_CONTACT_TO_EMAIL="${NEXT_PUBLIC_CONTACT_TO_EMAIL}" \
-              --env-add NEXT_PUBLIC_TURNSTILE_SITE_KEY="${NEXT_PUBLIC_TURNSTILE_SITE_KEY}" \
-              --env-add NEXT_PUBLIC_CAL_LINK="${NEXT_PUBLIC_CAL_LINK}" \
-              --env-add TURNSTILE_SECRET_KEY="${TURNSTILE_SECRET_KEY}" \
-              --env-add RESEND_API_KEY="${RESEND_API_KEY}" \
-              --env-add CONTACT_FROM_EMAIL="${CONTACT_FROM_EMAIL}" \
-              --env-add CONTACT_TO_EMAIL="${CONTACT_TO_EMAIL}" \
               --image "${IMAGE}" "${SERVICE}"
           EOF

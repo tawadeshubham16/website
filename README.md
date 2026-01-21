@@ -21,10 +21,21 @@ npm run start    # serve the production build
 
 ## Content notes
 
-- Contact email and mailto subject/body live at the top of `app/components/Contact.tsx`.
+- Contact email lives at the top of `app/components/Contact.tsx`; the form posts to `/api/contact` and is Turnstile-protected.
 - Navigation labels/anchors are defined in `app/components/Navbar.tsx` and mirrored in the footer.
 - Hero expertise cards (`Banner`), services list (`Services`), and expertise tiles (`Expertise`) are driven by local arrays inside each component.
 - Compliance badges and company details are in `app/components/About.tsx` and `app/components/Footer.tsx`.
+
+## Environment
+
+Set these for the contact form to work:
+
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` — Cloudflare Turnstile site key (public).
+- `TURNSTILE_SECRET_KEY` — Turnstile secret key for backend verification.
+- `RESEND_API_KEY` — Resend API key used to send the email.
+- `CONTACT_FROM_EMAIL` — Verified sender address for Resend (required).
+- `CONTACT_TO_EMAIL` — Destination inbox; defaults to `hello@neesh.ie` if omitted.
+- `NEXT_PUBLIC_CAL_LINK` — Cal.com booking URL used by the “Book intro call” buttons (defaults to the 15-minute event link if unset).
 
 ## Deployment
 

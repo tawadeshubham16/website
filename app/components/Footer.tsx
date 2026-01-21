@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CAL_LINK } from "../lib/calLink";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -51,6 +52,15 @@ export default function Footer() {
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d3fa7] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_38px_rgba(29,63,167,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_48px_rgba(29,63,167,0.28)]"
           >
             Send inquiry
+          </Link>
+          <Link
+            href={CAL_LINK}
+            target="_blank"
+            rel="noreferrer"
+            prefetch={false}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_38px_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10 hover:shadow-[0_18px_48px_rgba(255,255,255,0.12)]"
+          >
+            Book intro call
           </Link>
         </div>
       </div>

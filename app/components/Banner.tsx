@@ -1,5 +1,6 @@
 import Link from "next/link";
 import banner from "../assets/banner.png";
+import { CAL_LINK } from "../lib/calLink";
 
 type IconProps = {
   className?: string;
@@ -72,6 +73,15 @@ export default function Banner() {
               className="rounded-xl bg-[#1d3fa7] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_48px_rgba(29,63,167,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(29,63,167,0.3)]"
             >
               Check availability
+            </Link>
+            <Link
+              href={CAL_LINK}
+              target="_blank"
+              rel="noreferrer"
+              prefetch={false}
+              className="rounded-xl border border-[#1d3fa7] bg-white px-6 py-3 text-sm font-semibold text-[#1d3fa7] shadow-[0_18px_48px_rgba(29,63,167,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(29,63,167,0.2)]"
+            >
+              Book intro call
             </Link>
           </div>
         </div>

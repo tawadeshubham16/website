@@ -1,6 +1,9 @@
-const contactEmail = "hello@neesh.ie";
+"use client";
 
-const mailtoLink = `mailto:${contactEmail}?subject=Contract%20Engineer%20Inquiry&body=Email:%0AMessage:%0A`;
+import Script from "next/script";
+import { FormEvent, useState } from "react";
+
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 const includeItems = [
   {
@@ -21,101 +24,196 @@ const includeItems = [
   },
 ];
 
+type FormStatus = "idle" | "submitting" | "success" | "error";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      reset: (widgetId?: string | HTMLElement) => void;
+    };
+  }
+}
+
 export default function Contact() {
+  const [status, setStatus] = useState<FormStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!turnstileSiteKey) {
+      setError("Form is temporarily unavailable. Missing Turnstile site key.");
+      setStatus("error");
+      return;
+    }
+
+    const formData = new FormData(form);
+    const email = (formData.get("Email") ?? "").toString().trim();
+    const message = (formData.get("Message") ?? "").toString().trim();
+    const turnstileToken =
+      (
+        formData.get("cf-turnstile-response") ??
+        formData.get("g-recaptcha-response")
+      )?.toString() ?? "";
+
+    if (!turnstileToken) {
+      setError("Please complete the verification challenge.");
+      setStatus("error");
+      return;
+    }
+
+    setStatus("submitting");
+    setError(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message, turnstileToken }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setError(
+          data?.error ??
+            "We couldn't send your message. Please try again in a moment.",
+        );
+        setStatus("error");
+        return;
+      }
+
+      setStatus("success");
+      form.reset();
+      window.turnstile?.reset();
+    } catch (submitError) {
+      console.error(submitError);
+      setError("We couldn't send your message. Please try again in a moment.");
+      setStatus("error");
+    }
+  };
+
+  const isSubmitting = status === "submitting";
+
   return (
-    <section
-      id="contact"
-      className="relative isolate overflow-hidden bg-gradient-to-b from-[#f7f9ff] via-white to-white py-16 text-[#0f1f4b] md:py-24"
-      style={{ scrollMarginTop: "var(--navbar-height)" }}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-70"
-        aria-hidden
-        style={{
-          backgroundImage:
-            "radial-gradient(900px at 20% 20%, rgba(29,63,167,0.12), transparent 45%), radial-gradient(800px at 80% 10%, rgba(91,155,255,0.1), transparent 40%)",
-        }}
-      />
-      <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 md:px-6">
-        <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5c6fb1]">
-            Business & recruiter inquiries
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold leading-tight md:text-4xl">
-            Ready to discuss?
-          </h2>
-          <p className="mt-3 text-sm text-slate-600 md:text-base">
-            Send the essentials and I&apos;ll respond quickly with availability,
-            next steps, and a fit check.
-          </p>
-        </div>
-
-        <div className="grid items-start gap-8 md:grid-cols-[1.2fr_0.8fr] lg:gap-10">
-          <div className="rounded-3xl border border-slate-100 bg-white/92 p-7 shadow-[0_22px_60px_rgba(15,23,42,0.12)] backdrop-blur md:p-8">
-            <div className="flex items-center gap-3">
-              <EnvelopeIcon className="h-6 w-6 text-[#1d3fa7]" />
-              <h3 className="text-lg font-semibold">Send an inquiry</h3>
-            </div>
-            <form
-              className="mt-6 space-y-7"
-              action={mailtoLink}
-              method="POST"
-              encType="text/plain"
-            >
-              <label className="space-y-2.5 text-sm text-slate-700">
-                <span className="mb-1">Email:</span>
-                <input
-                  name="Email"
-                  type="email"
-                  required
-                  className="mb-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[#0f1f4b] placeholder:text-slate-400 outline-none transition focus:border-[#1d3fa7] focus:ring-2 focus:ring-[#1d3fa7]/15"
-                  placeholder="alex@company.com"
-                />
-              </label>
-              <label className="mt-3 space-y-2.5 text-sm text-slate-700">
-                <span className="mb-1">Message:</span>
-                <textarea
-                  name="Message"
-                  rows={8}
-                  className="mb-2 w-full rounded-xl border resize-none border-slate-200 bg-white px-3 py-2 text-[#0f1f4b] placeholder:text-slate-400 outline-none transition focus:border-[#1d3fa7] focus:ring-2 focus:ring-[#1d3fa7]/15"
-                  placeholder="Hi there! I’m looking for a full stack engineer to help with..."
-                  required
-                />
-              </label>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d3fa7] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_48px_rgba(29,63,167,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(29,63,167,0.28)]"
-                >
-                  Send Inquiry
-                </button>
-              </div>
-            </form>
+    <>
+      <section
+        id="contact"
+        className="relative isolate overflow-hidden bg-gradient-to-b from-[#f7f9ff] via-white to-white py-16 text-[#0f1f4b] md:py-24"
+        style={{ scrollMarginTop: "var(--navbar-height)" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "radial-gradient(900px at 20% 20%, rgba(29,63,167,0.12), transparent 45%), radial-gradient(800px at 80% 10%, rgba(91,155,255,0.1), transparent 40%)",
+          }}
+        />
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 md:px-6">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5c6fb1]">
+              Business & recruiter inquiries
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight md:text-4xl">
+              Ready to discuss?
+            </h2>
+            <p className="mt-3 text-sm text-slate-600 md:text-base">
+              Send the essentials and I&apos;ll respond quickly with availability,
+              next steps, and a fit check.
+            </p>
           </div>
 
-          <div className="flex flex-col gap-5 rounded-3xl border border-slate-100 bg-white/92 p-7 shadow-[0_22px_60px_rgba(15,23,42,0.12)] backdrop-blur md:p-8">
-            <div className="space-y-4">
-              <p className="text-sm uppercase tracking-[0.2em] text-[#5c6fb1]">
-                What to include
-              </p>
-              <div className="grid gap-3">
-                {includeItems.map(({ text, Icon }) => (
+          <div className="grid items-start gap-8 md:grid-cols-[1.2fr_0.8fr] lg:gap-10">
+            <div className="rounded-3xl border border-slate-100 bg-white/92 p-7 shadow-[0_22px_60px_rgba(15,23,42,0.12)] backdrop-blur md:p-8">
+              <div className="flex items-center gap-3">
+                <EnvelopeIcon className="h-6 w-6 text-[#1d3fa7]" />
+                <h3 className="text-lg font-semibold">Send an inquiry</h3>
+              </div>
+              <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
+                <label className="space-y-2.5 text-sm text-slate-700">
+                  <span className="mb-1">Email:</span>
+                  <input
+                    name="Email"
+                    type="email"
+                    required
+                    className="mb-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[#0f1f4b] placeholder:text-slate-400 outline-none transition focus:border-[#1d3fa7] focus:ring-2 focus:ring-[#1d3fa7]/15"
+                    placeholder="alex@company.com"
+                  />
+                </label>
+                <label className="space-y-2.5 text-sm text-slate-700">
+                  <span className="mb-1">Message:</span>
+                  <textarea
+                    name="Message"
+                    rows={8}
+                    className="mb-2 w-full rounded-xl border resize-none border-slate-200 bg-white px-3 py-2 text-[#0f1f4b] placeholder:text-slate-400 outline-none transition focus:border-[#1d3fa7] focus:ring-2 focus:ring-[#1d3fa7]/15"
+                    placeholder="Hi there! I’m looking for a full stack engineer to help with..."
+                    required
+                  />
+                </label>
+
+                <div className="space-y-3">
                   <div
-                    key={text}
-                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3"
-                  >
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#eef0ff] text-[#1d3fa7]">
-                      <Icon className="h-3.5 w-3.5" />
-                    </span>
-                    <p className="text-sm text-slate-700">{text}</p>
+                    className="cf-turnstile"
+                    data-sitekey={turnstileSiteKey ?? ""}
+                    data-theme="light"
+                  />
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !turnstileSiteKey}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d3fa7] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_48px_rgba(29,63,167,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(29,63,167,0.28)] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isSubmitting ? "Sending..." : "Send Inquiry"}
+                    </button>
+                    <p className="text-xs text-slate-500">
+                      Protected by Cloudflare Turnstile
+                    </p>
                   </div>
-                ))}
+                  {status === "success" && (
+                    <p className="text-sm font-medium text-green-700" aria-live="polite">
+                      Thanks — your message was sent. I&apos;ll reply soon.
+                    </p>
+                  )}
+                  {error && (
+                    <p className="text-sm font-medium text-red-600" aria-live="assertive">
+                      {error}
+                    </p>
+                  )}
+                  {!turnstileSiteKey && (
+                    <p className="text-sm text-red-600" aria-live="assertive">
+                      Add NEXT_PUBLIC_TURNSTILE_SITE_KEY to enable the form.
+                    </p>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            <div className="flex flex-col gap-5 rounded-3xl border border-slate-100 bg-white/92 p-7 shadow-[0_22px_60px_rgba(15,23,42,0.12)] backdrop-blur md:p-8">
+              <div className="space-y-4">
+                <p className="text-sm uppercase tracking-[0.2em] text-[#5c6fb1]">
+                  What to include
+                </p>
+                <div className="grid gap-3">
+                  {includeItems.map(({ text, Icon }) => (
+                    <div
+                      key={text}
+                      className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3"
+                    >
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#eef0ff] text-[#1d3fa7]">
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
+                      <p className="text-sm text-slate-700">{text}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+    </>
   );
 }
 

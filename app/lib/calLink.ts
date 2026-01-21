@@ -1,0 +1,1 @@
+export const CAL_LINK = process.env.NEXT_PUBLIC_CAL_LINK ?? "https://cal.com/example/default";

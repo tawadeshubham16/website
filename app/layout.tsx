@@ -12,14 +12,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://neeshenterprise.com/";
-const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://neeshenterprise.com";
 const metadataBase =
   (() => {
     try {
       return new URL(siteUrl);
     } catch {
-      return new URL("https://neeshenterprise.com/");
+      return new URL("https://neeshenterprise.com");
     }
   })();
 const canonicalUrl = metadataBase.toString().replace(/\/$/, "") + "/";
@@ -85,10 +84,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/logo.ico",
-  },
-  ...(googleSiteVerification
-    ? { verification: { google: googleSiteVerification } }
-    : {}),
+  }
 };
 
 export default function RootLayout({

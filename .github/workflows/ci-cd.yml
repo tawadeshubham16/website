@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  SWARM_SERVICE: website_neeshenterprise_frontend
+  SWARM_SERVICE: stack_neeshenterprise_frontend
   NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
   NEXT_PUBLIC_CONTACT_TO_EMAIL: ${{ secrets.NEXT_PUBLIC_CONTACT_TO_EMAIL }}
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}

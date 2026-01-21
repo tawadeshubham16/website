@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://neeshenterprise.com/";
+const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 const metadataBase =
   (() => {
     try {
@@ -85,6 +86,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo.ico",
   },
+  ...(googleSiteVerification
+    ? { verification: { google: googleSiteVerification } }
+    : {}),
 };
 
 export default function RootLayout({

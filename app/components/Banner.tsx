@@ -54,7 +54,7 @@ export default function Banner() {
         <div className="absolute inset-0 bg-gradient-to-br from-white/82 via-white/56 to-white/10 backdrop-blur-[1px]" />
       </div>
 
-      <div className="relative mx-auto flex h-full max-w-6xl flex-col gap-12 px-4 py-16 md:flex-row md:items-center md:justify-between md:px-6 lg:py-24">
+        <div className="relative mx-auto flex h-full max-w-6xl flex-col gap-12 px-4 py-16 md:flex-row md:items-center md:justify-between md:px-6 lg:py-24">
         <div className="flex-1 space-y-6">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6a7bb5]">
             Full-Stack Contract Engineer
@@ -63,9 +63,9 @@ export default function Banner() {
             Full-Stack Contract Engineer in Ireland
           </h1>
           <p className="max-w-2xl text-base leading-relaxed text-slate-700 md:text-lg">
-            I help teams deliver modern web applications using React/Angular,
-            Java/Spring Boot, Node.js, Docker, and AWS — fast onboarding, clean
-            execution, production-ready results.
+            Neesh Enterprise Strategies delivers modern web applications using
+            React/Angular, Java/Spring Boot, Node.js, Docker, and AWS — fast
+            onboarding, clean execution, production-ready results.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link

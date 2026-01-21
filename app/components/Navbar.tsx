@@ -39,7 +39,12 @@ export default function Navbar() {
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
         <Link href="/" className="flex items-center" aria-label="Home">
-          <Image src={logo} alt="Site logo" className="h-14 w-auto" priority />
+          <Image
+            src={logo}
+            alt="Neesh Enterprise Strategies logo"
+            className="h-14 w-auto"
+            priority
+          />
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
           {navItems.map((item) => (
